@@ -1,4 +1,7 @@
+import os
+
 from settings import *
+import shutil
 print("Список команд для ввода:"
 "\n1 - crdir [dir name] - Создание папки (с указанием имени)"
 "\n2 - deldir [dir name] - Удаление папки по имени"
@@ -15,9 +18,14 @@ command = input("Введите команду: ")
 all_commands = ["crdir", "deldir", "cddir", "mkfile", "wrfile", "catfile", "rm", "cpfile", "mvfile", "renamef"]
 node = os.path.abspath(wd)
 def crdir(dirname):
+    global node
     print("Создание папки...")
     os.mkdir(node+"\\"+dirname)
 
+def deldir(dirname):
+    global node
+    print("Удаление папки...")
+    os.rmdir(node+"\\"+dirname)
 
 while command != 'exit':
     lis = command.split()
@@ -28,8 +36,15 @@ while command != 'exit':
             except FileExistsError:
                 print('Директория с таким названием уже существует!')
         elif lis[0] == "deldir":
-
-            pass
+            if os.path.isdir(node+"\\"+lis[1]):
+                try:
+                    deldir(lis[1])
+                except OSError:
+                    ok = input("Папка не пуста, вы уверены, что хотите удалить её? Нажмите Y")
+                    if ok == "Y":
+                        shutil.rmtree(node+"\\"+lis[1])
+                    else:
+                        pass
         elif lis[0] == "cddir":
             pass
         elif lis[0] == "mkfile":
