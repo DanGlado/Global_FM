@@ -8,8 +8,8 @@ print("Список команд для ввода:"
 "\n5 - wrfile [filename]- Запись текста в файл"
 "\n6 - catfile [filename]- Просмотр содержимого текстового файла"
 "\n7 - rmf [filename1 filename2 ...] - Удаление файлов по имени"
-"\n8 - cpfile [filename1 filename2 ...] - Копирование файлов из одной папки в другую"
-"\n9 - mvfile [filename1 filename2 ...] - Перемещение файлов"
+"\n8 - cpfile [filename folder] - Копирование файлов из одной папки в другую"
+"\n9 - mvfile [filename folder] - Перемещение файлов"
 "\n10 - renamef [filename] [new_filename] - Переименование файлов")
 
 command = input("Введите команду: ")
@@ -60,6 +60,17 @@ def cpfile(filename, path):
     shutil.copy(filename, path, follow_symlinks=True)
 
 
+def mvfile(filename, path):
+    print("Перемещение файла...")
+    if os.path.isfile(filename):
+        shutil.move(filename, path)
+
+
+def renamef(filename, new_filename):
+    print("Переименование файла...")
+    if os.path.isfile(filename):
+        shutil.move(filename, new_filename)
+
 
 while command != 'exit':
     if save_node in node:
@@ -104,9 +115,9 @@ while command != 'exit':
             elif lis[0] == "cpfile":
                 cpfile(node+"\\"+lis[1], node+"\\"+lis[2])
             elif lis[0] == "mvfile":
-                pass
+                mvfile(node+"\\"+lis[1], node+"\\"+lis[2])
             elif lis[0] == "renamef":
-                pass
+                renamef(node+"\\"+lis[1], node+"\\"+lis[2])
         else:
             print("Проверьте наличие синтаксической ошибки в команде и корректность аргументов!")
         command = input("Введите команду: ")
