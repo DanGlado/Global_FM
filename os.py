@@ -17,50 +17,78 @@ print("Список команд для ввода:"
 command = input("Введите команду: ")
 all_commands = ["crdir", "deldir", "cddir", "mkfile", "wrfile", "catfile", "rm", "cpfile", "mvfile", "renamef"]
 node = os.path.abspath(wd)
+save_node = node
+
 def crdir(dirname):
     global node
-    print("Создание папки...")
+    print("Создание папки "+dirname)
     os.mkdir(node+"\\"+dirname)
+
 
 def deldir(dirname):
     global node
-    print("Удаление папки...")
+    print("Удаление папки "+dirname)
     os.rmdir(node+"\\"+dirname)
 
+
+def cddir(dirname):
+    global node
+    print("Перемещение в каталог "+dirname)
+    os.chdir(node+"\\"+dirname)
+def mkfile(filename):
+    open(filename, "w")
+def wrfile(filename):
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(input())
 while command != 'exit':
-    lis = command.split()
-    if lis[0] in all_commands and len(lis) > 1:
-        if lis[0] == "crdir":
-            try:
-                crdir(lis[1])
-            except FileExistsError:
-                print('Директория с таким названием уже существует!')
-        elif lis[0] == "deldir":
-            if os.path.isdir(node+"\\"+lis[1]):
+    if save_node in node:
+        lis = command.split()
+        if lis[0] in all_commands and len(lis) > 1:
+            if lis[0] == "crdir":
                 try:
-                    deldir(lis[1])
-                except OSError:
-                    ok = input("Папка не пуста, вы уверены, что хотите удалить её? Нажмите Y")
-                    if ok == "Y":
-                        shutil.rmtree(node+"\\"+lis[1])
-                    else:
-                        pass
-        elif lis[0] == "cddir":
-            pass
-        elif lis[0] == "mkfile":
-            pass
-        elif lis[0] == "wrfile":
-            pass
-        elif lis[0] == "catfile":
-            pass
-        elif lis[0] == "rm":
-            pass
-        elif lis[0] == "cpfile":
-            pass
-        elif lis[0] == "mvfile":
-            pass
-        elif lis[0] == "renamef":
-            pass
+                    crdir(lis[1])
+                except FileExistsError:
+                    print('Директория с таким названием уже существует!')
+            elif lis[0] == "deldir":
+                if os.path.isdir(node+"\\"+lis[1]):
+                    try:
+                        deldir(lis[1])
+                    except OSError:
+                        ok = input("Папка не пуста, вы уверены, что хотите удалить её? Нажмите Y")
+                        if ok == "Y":
+                            shutil.rmtree(node+"\\"+lis[1])
+                        else:
+                            pass
+            elif lis[0] == "cddir":
+                print("Current dir:", os.getcwd())
+                if os.path.isdir(os.getcwd()+"\\"+lis[1]):
+                    os.chdir(node+"\\"+lis[1])
+                elif lis[1] == "..":
+                    os.chdir(os.path.basename(node))
+                else:
+                    print("Такой директории не найдено!")
+                print("Current dir:", os.getcwd())
+                node = os.getcwd()
+            elif lis[0] == "mkfile":
+                for i in range(1, len(lis)):
+                    print("Создаем файл "+lis[i])
+                    mkfile(node+"\\"+lis[i])
+            elif lis[0] == "wrfile":
+                wrfile(node+"\\"+lis[1])
+            elif lis[0] == "catfile":
+                pass
+            elif lis[0] == "rm":
+                pass
+            elif lis[0] == "cpfile":
+                pass
+            elif lis[0] == "mvfile":
+                pass
+            elif lis[0] == "renamef":
+                pass
+        else:
+            print("Проверьте наличие синтаксической ошибки в команде и корректность аргументов!")
+        command = input("Введите команду: ")
     else:
-        print("Проверьте наличие синтаксической ошибки в команде и корректность аргументов!")
-    command = input("Введите команду: ")
+        print("Вы не можете покинуть корневую директорию")
+        node = save_node
+        continue
