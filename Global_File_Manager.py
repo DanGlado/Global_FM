@@ -3,9 +3,7 @@ import shutil
 import os
 import platform
 
-# Особенность программы (требует улучшения)!!! - Невозможно работать с родительскими каталогами, например,
-# Нельзя переместить(скопировать) файл \home\dir\file в папку \home
-
+# Особенность программы - видит родительскую (..), текущую (Current dir) и дочерние директории первого уровня
 print("Система определена как " + platform.system())
 
 print("Список команд для ввода:"
@@ -148,9 +146,17 @@ def main():
                     for i in range(1, len(lis)):
                         rmf(lis[i])  # Удаляем один или несколько файлов по назначенным именам через пробел
                 elif lis[0] == "cpfile":
-                    cpfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
+                    if lis[1] == '..':
+                        path_node_tmp = os.path.dirname(path_node)  # Временная переменная для определения родительской директории
+                        cpfile(path_node + os.sep + lis[1], path_node_tmp)
+                    else:
+                        cpfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
                 elif lis[0] == "mvfile":
-                    mvfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
+                    if lis[1] == '..':
+                        path_node_tmp = os.path.dirname(path_node)
+                        mvfile(path_node + os.sep + lis[1], path_node_tmp)
+                    else:
+                        mvfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
                 elif lis[0] == "renamef":
                     renamef(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
             else:
