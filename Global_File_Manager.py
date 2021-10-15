@@ -1,10 +1,12 @@
-from settings import *
+from settings import *  # Импорт всех функций и данных из файла settings.py
 import shutil
 import os
 import platform
 
+# Особенность программы (требует улучшения)!!! - Невозможно работать с родительскими каталогами, например,
+# Нельзя переместить(скопировать) файл \home\dir\file в папку \home
 
-print("Система определена как "+platform.system())
+print("Система определена как " + platform.system())
 
 print("Список команд для ввода:"
       "\n1 - crdir [dir name] - Создание папки (с указанием имени)"
@@ -20,50 +22,54 @@ print("Список команд для ввода:"
 
 command = input("Введите команду: ")
 all_commands = ["crdir", "deldir", "cddir", "mkfile", "wrfile", "catfile", "rmf", "cpfile", "mvfile", "renamef"]
-node = os.path.abspath(wd)
-save_node = node
+node = os.path.abspath(wd)  # Определяем начальный путь
+save_node = node  # Сохраняем этот путь как корневой
+path_node = node  # Определяем корневой путь как текущий
 
-if platform.system() == "Windows":
-    de = '\\'
-    path_node = node
-elif platform.system() == "Linux":
-    de = '/'
-    path_node = node
+# Описание функций для работы с файлами и папками
 
 def crdir(dirname):
-    global path_node
-    print("Создание папки "+dirname)
-    os.mkdir(path_node + os.sep + dirname)
-
+    global path_node  # Глобальная переменная текущего пути
+    try:
+        print("Создание папки "+dirname)
+        os.mkdir(path_node + os.sep + dirname)
+    except FileExistsError:
+        print('Директория с таким названием уже существует!')
 
 def deldir(dirname):
     global path_node
     try:
-        print("Удаление папки "+dirname)
-        os.rmdir(path_node + os.sep + dirname)
-    except:
-        print("Это не папка!")
+        print("Удаление папки "+dirname, path_node + os.sep + dirname)
+        os.rmdir(path_node + os.sep + dirname)  # Удаляем директорию
+    except OSError:
+        ok = input("Папка не пуста, вы уверены, что хотите удалить её? Нажмите Y ")
+        if ok == "Y" or ok == "y":
+            shutil.rmtree(path_node + os.sep + dirname)  # Принудительно удаляем непустую директорию
+        else:
+            pass
+    except PermissionError:
+        print("Папка недоступна для удаления")
 
 def cddir(dirname):
     global path_node
     print("Перемещение в каталог "+dirname)
-    os.chdir(path_node + os.sep + dirname)
+    os.chdir(path_node + os.sep + dirname)  # Устанавливаем новую текущую директорию
 
 
 def mkfile(filename):
-    open(filename, "w")
+    open(filename, "w")  # Создание файла для записи
 
 
 def wrfile(filename):
     try:
-        with open(filename, 'w', encoding='utf-8') as file:
+        with open(filename, 'w', encoding='utf-8') as file:  # Открытие файла для записи в него текста
             file.write(input())
     except PermissionError:
         print("Это не файл!")
 
 def catfile(filename):
     try:
-        with open(filename, 'r') as f:
+        with open(filename, 'r') as f:  # Открытие файла для чтения
             data = f.read()
             print(data)
     except PermissionError:
@@ -80,79 +86,80 @@ def rmf(filename):
 
 def cpfile(filename, path):
     print("Копирование файла...")
-    shutil.copy(filename, path, follow_symlinks=True)
+    shutil.copy(filename, path, follow_symlinks=True)  # Копирование файла в другую директорию, которая
+    # Находится в том же каталоге, что и пользователь
 
 
 def mvfile(filename, path):
     print("Перемещение файла...")
-    if os.path.isfile(filename):
+    if os.path.isfile(filename):  # Проверка, существует ли такой файл
         try:
             shutil.move(filename, path)
         except shutil.Error:
-            print("Такой файл уже существует!")
+            print("Такой файл уже существует в указанной директории!")
+    else:
+        print("Такой файл не существует!")
+
 
 def renamef(filename, new_filename):
     print("Переименование файла...")
-    if os.path.isfile(filename):
+    if os.path.isfile(filename):  # Проверка, существует ли такой файл
         shutil.move(filename, new_filename)
-
-
-while command != 'exit':
-    if save_node in path_node:
-        lis = command.split()
-        if lis[0] in all_commands and len(lis) > 1:
-            if lis[0] == "crdir":
-                try:
-                    crdir(lis[1])
-                except FileExistsError:
-                    print('Директория с таким названием уже существует!')
-            elif lis[0] == "deldir":
-                if os.path.isdir(path_node + os.sep + lis[1]):
-                    try:
-                        deldir(lis[1])
-                    except OSError:
-                        ok = input("Папка не пуста, вы уверены, что хотите удалить её? Нажмите Y")
-                        if ok == "Y":
-                            shutil.rmtree(path_node + os.sep + lis[1])
-                        else:
-                            pass
-
-
-            elif lis[0] == "cddir":
-                if lis[1] == "..":
-                    os.path.normpath(os.getcwd() + os.sep + os.pardir)
-                    path_node = save_node
-                elif os.path.isdir(path_node + os.sep + lis[1]):
-                    os.chdir(path_node + os.sep + lis[1])
-                    path_node = path_node + os.sep + lis[1]
-                else:
-                    print("Такой директории не найдено!", path_node + os.sep + lis[1])
-
-                print("Current dir:", path_node)
-
-
-            elif lis[0] == "mkfile":
-                for i in range(1, len(lis)):
-                    print("Создаем файл "+lis[i])
-                    mkfile(path_node + os.sep + lis[i])
-            elif lis[0] == "wrfile":
-                wrfile(path_node + os.sep +lis[1])
-            elif lis[0] == "catfile":
-                catfile(path_node + os.sep + lis[1])
-            elif lis[0] == "rmf":
-                for i in range(1, len(lis)):
-                    rmf(lis[i])
-            elif lis[0] == "cpfile":
-                cpfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
-            elif lis[0] == "mvfile":
-                mvfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
-            elif lis[0] == "renamef":
-                renamef(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
-        else:
-            print("Проверьте наличие синтаксической ошибки в команде и корректность аргументов!")
-        command = input("Введите команду: ")
     else:
-        print("Вы не можете покинуть корневую директорию, вы были возвращены к корневой папке")
-        print("Current dir:", node)
-        node = save_node
-        continue
+        print("Такой файл не существует!")
+
+
+def main():
+    global command
+    global path_node
+    global save_node
+    while command != 'exit':
+        if save_node in path_node:
+            lis = command.split()  # Разбиваем введенный текст пользователем для анализа
+            if lis[0] in all_commands and len(lis) > 1:  # Если команда является верной (находится в списке команд) И
+                # она введена с параметрами
+                if lis[0] == "crdir":
+                    crdir(lis[1])
+                elif lis[0] == "deldir":
+                    if os.path.isdir(path_node + os.sep + lis[1]):  # Существует ли директория?
+                        deldir(lis[1])
+                elif lis[0] == "cddir":
+                    if lis[1] == "..":
+                        path_node = os.path.dirname(path_node)  # Назначение нового пути (родительский каталог)
+                        os.chdir(path_node)  # Изменение текущей директории
+                    elif os.path.isdir(path_node + os.sep + lis[1]):  # Существует ли директория?
+                        os.chdir(path_node + os.sep + lis[1])
+                        path_node = path_node + os.sep + lis[1]
+                    else:
+                        print("Такой директории не найдено!", path_node + os.sep + lis[1])
+                    if len(path_node) >= len(save_node):
+                        print("Current dir:", path_node)
+
+
+                elif lis[0] == "mkfile":
+                    for i in range(1, len(lis)):  # Создаем один или несколько файлов по назначенным именам через пробел
+                        print("Создаем файл "+lis[i])
+                        mkfile(path_node + os.sep + lis[i])
+                elif lis[0] == "wrfile":
+                    wrfile(path_node + os.sep + lis[1])
+                elif lis[0] == "catfile":
+                    catfile(path_node + os.sep + lis[1])
+                elif lis[0] == "rmf":
+                    for i in range(1, len(lis)):
+                        rmf(lis[i])  # Удаляем один или несколько файлов по назначенным именам через пробел
+                elif lis[0] == "cpfile":
+                    cpfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
+                elif lis[0] == "mvfile":
+                    mvfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
+                elif lis[0] == "renamef":
+                    renamef(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
+            else:
+                print("Проверьте наличие синтаксической ошибки в команде и корректность аргументов!")
+            command = input("Введите команду: ")
+        else:
+            print("Вы не можете покинуть корневую директорию, вы были возвращены к корневой папке")
+            print("Current dir:", save_node)
+            path_node = save_node
+            continue
+
+main()
