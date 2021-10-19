@@ -145,15 +145,21 @@ def main():
                     for i in range(1, len(lis)):
                         rmf(lis[i])  # Удаляем один или несколько файлов по назначенным именам через пробел
                 elif lis[0] == "cpfile":
-                    if lis[1] == '..':
+                    if lis[2] == '..':
                         path_node_tmp = os.path.dirname(path_node)  # Временная переменная для определения родительской директории
-                        cpfile(path_node + os.sep + lis[1], path_node_tmp)
+                        if len(path_node_tmp) < len(save_node):
+                            print("Вы находитесь в корневой директории!")
+                        else:
+                            cpfile(path_node + os.sep + lis[1], path_node_tmp)
                     else:
                         cpfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
                 elif lis[0] == "mvfile":
-                    if lis[1] == '..':
+                    if lis[2] == '..':
                         path_node_tmp = os.path.dirname(path_node)
-                        mvfile(path_node + os.sep + lis[1], path_node_tmp)
+                        if len(path_node_tmp) < len(save_node):
+                            print("Вы находитесь в корневой директории!")
+                        else:
+                            mvfile(path_node + os.sep + lis[1], path_node_tmp)
                     else:
                         mvfile(path_node + os.sep + lis[1], path_node + os.sep + lis[2])
                 elif lis[0] == "renamef":
